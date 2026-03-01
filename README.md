@@ -8,6 +8,10 @@ It supports:
 - OpenAI API or local Ollama model
 - Streamlit chat UI with source traceability
 
+## Showcase
+
+![Medical RAG UI](docs/images/medical-rag-ui.png)
+
 ## Tech Stack
 
 - Python 3.9
