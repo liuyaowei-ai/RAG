@@ -1,19 +1,18 @@
 # 轻量级医疗 RAG 问答系统（Python 3.9）
 
-本项目用于计算机复试展示：基于本地医疗知识库（PDF/TXT）实现 RAG（检索增强生成）问答，支持 OpenAI API 或本地 Ollama 模型，前端采用 Streamlit。
+基于本地医疗知识库（PDF/TXT）的检索增强生成（RAG）系统。  
+系统支持 OpenAI API 或本地 Ollama 模型，提供 Streamlit 交互界面，并展示回答对应的本地文档来源。
 
-## 1. 技术栈
+## 技术栈
 
-- 语言：Python 3.9
-- RAG 框架：LangChain
-- 向量数据库：ChromaDB（本地持久化）
+- Python 3.9
+- LangChain
+- ChromaDB（本地向量数据库）
 - Embedding：`shibing624/text2vec-base-chinese`
-- 大模型：
-- OpenAI（如 `gpt-4o-mini`）
-- Ollama 本地模型（如 `qwen2.5:7b`）
+- LLM：OpenAI / Ollama
 - 前端：Streamlit
 
-## 2. requirements.txt（详细）
+## requirements.txt
 
 ```txt
 langchain==0.2.16
@@ -28,44 +27,49 @@ pypdf==4.3.1
 streamlit==1.37.1
 python-dotenv==1.0.1
 tqdm==4.66.5
+requests==2.32.3
+beautifulsoup4==4.12.3
+lxml==5.3.0
 ```
 
-## 3. 推荐目录结构（PyCharm）
+## 项目结构
 
 ```text
 rag/
-├── app.py                      # Streamlit 前端
-├── requirements.txt            # 依赖清单
-├── .env.example                # 环境变量模板
+├── app.py
+├── requirements.txt
+├── .env.example
 ├── .gitignore
 ├── README.md
 ├── config/
 │   ├── __init__.py
-│   └── settings.py             # 全局配置（目录、模型、chunk 参数）
+│   └── settings.py
 ├── core/
 │   ├── __init__.py
-│   ├── data_loader.py          # 文档读取、切分、向量化、持久化
-│   └── rag_engine.py           # Top-K 检索 + Prompt + LLM 生成
+│   ├── data_loader.py
+│   └── rag_engine.py
+├── scripts/
+│   └── fetch_medical_docs.py
 ├── data/
-│   └── knowledge/              # 本地医疗知识库（PDF/TXT）
+│   └── knowledge/
 └── docs/
-    └── index.html              # 静态展示页（可用于 GitHub Pages）
+    └── index.html
 ```
 
-## 4. 模块说明（简要）
+## 模块说明
 
-- `config/settings.py`：集中管理路径、模型名、Top-K、chunk 参数，避免硬编码。
-- `core/data_loader.py`：处理本地医疗文档并写入 Chroma 向量库。
-- `core/rag_engine.py`：实现“先检索、后生成”，并限制模型只基于检索上下文回答。
-- `app.py`：可上传文档、重建向量库、聊天问答、展示参考来源。
-- `docs/index.html`：静态网页说明页，便于仓库演示。
+- `config/settings.py`：统一管理模型、目录、chunk 参数。
+- `core/data_loader.py`：读取 PDF/TXT，切分文本，生成向量并写入 Chroma。
+- `core/rag_engine.py`：Top-K 检索 + Prompt 组装 + LLM 回答。
+- `app.py`：上传文档、重建向量库、聊天问答、引用来源展示。
+- `scripts/fetch_medical_docs.py`：自动抓取公开网页并保存为本地 TXT 文档。
 
-## 5. 医疗文本分块策略
+## 文本切分策略
 
-- 推荐参数：`chunk_size=500`，`chunk_overlap=100`
-- 原因：医疗文本常有术语和前后句依赖，100 重叠可降低上下文断裂风险。
+- 默认：`chunk_size=500`，`chunk_overlap=100`
+- 理由：兼顾语义完整性与检索精度，减少上下文断裂。
 
-## 6. 检索原理（复试可讲）
+## 检索原理
 
 向量检索常用余弦相似度：
 
@@ -73,11 +77,9 @@ rag/
 cosine_similarity(A, B) = (A · B) / (||A|| * ||B||)
 ```
 
-相似度越高，表示问题与文档语义越接近，检索排序越靠前。
+## 快速开始
 
-## 7. 快速开始
-
-### 7.1 安装
+### 1) 安装依赖
 
 ```bash
 python -m venv .venv
@@ -86,48 +88,56 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 7.2 配置
+### 2) 配置环境变量
 
 ```bash
 copy .env.example .env
 ```
 
-- 若使用 OpenAI：填写 `OPENAI_API_KEY`
-- 若使用 Ollama：先本地启动 Ollama，并拉取模型
+- 使用 OpenAI：填写 `OPENAI_API_KEY`
+- 使用 Ollama：本地启动 Ollama 并拉取模型
 
-### 7.3 构建向量库
+### 3) 准备知识库文档
 
-将医疗 PDF/TXT 放入 `data/knowledge/` 后执行：
+方式 A（推荐，自动抓取公开资料）：
+
+```bash
+python scripts/fetch_medical_docs.py
+```
+
+方式 B（手工）：
+
+- 把本地医疗 PDF/TXT 放到 `data/knowledge/`
+
+### 4) 构建向量库
 
 ```bash
 python -m core.data_loader
 ```
 
-### 7.4 命令行测试 RAG
+### 5) 命令行测试问答
 
 ```bash
-python -m core.rag_engine --question "感冒发烧一般怎么处理？" --provider openai
+python -m core.rag_engine --question "高血压常见危险因素有哪些？" --provider openai
 ```
 
-### 7.5 启动前端
+### 6) 启动 Web 界面
 
 ```bash
 streamlit run app.py
 ```
 
-## 8. 上传 GitHub（命令）
+## GitHub
 
 ```bash
 git init
 git add .
-git commit -m "feat: build lightweight medical rag demo"
+git commit -m "feat: build medical rag system"
 git branch -M main
 git remote add origin https://github.com/liuyaowei-ai/RAG.git
 git push -u origin main
 ```
 
-## 9. 静态网页展示
+## 静态页面
 
-- 已提供 `docs/index.html`，可直接作为静态展示页。
-- GitHub Pages 可选择分支 `main` + 目录 `/docs`。
-
+- `docs/index.html` 可用于 GitHub Pages 展示（分支 `main`，目录 `/docs`）。

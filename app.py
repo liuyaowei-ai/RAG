@@ -39,7 +39,7 @@ def main() -> None:
     settings = get_settings()
 
     st.set_page_config(page_title="医疗 RAG 问答系统", page_icon="🩺", layout="wide")
-    st.title("医疗 RAG 问答系统（复试 Demo）")
+    st.title("医疗 RAG 问答系统")
     st.caption("仅基于本地知识库回答问题，减少医疗场景幻觉风险。")
 
     # 初始化会话状态

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "糖尿病",
+    "url": "https://www.who.int/zh/news-room/fact-sheets/detail/diabetes",
+    "saved_file": "data\\knowledge\\who_diabetes.txt",
+    "status": "ok"
+  },
+  {
+    "title": "高血压",
+    "url": "https://www.who.int/zh/news-room/fact-sheets/detail/hypertension",
+    "saved_file": "data\\knowledge\\who_hypertension.txt",
+    "status": "ok"
+  },
+  {
+    "title": "超重和肥胖",
+    "url": "https://www.who.int/zh/news-room/fact-sheets/detail/obesity-and-overweight",
+    "saved_file": "data\\knowledge\\who_obesity.txt",
+    "status": "ok"
+  },
+  {
+    "title": "心血管疾病",
+    "url": "https://www.who.int/zh/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)",
+    "saved_file": "data\\knowledge\\who_cardiovascular.txt",
+    "status": "ok"
+  }
+]
