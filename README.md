@@ -81,6 +81,17 @@ cosine_similarity(A, B) = (A · B) / (||A|| * ||B||)
 
 ## Quick Start
 
+### One-click Start (Windows)
+
+```bash
+.\start.bat
+```
+
+Optional args:
+- `start.bat -Rebuild` force rebuild vector store
+- `start.bat -SkipBuild` skip vector build
+- `start.bat -Port 8512` custom web port
+
 ### 1) Install dependencies
 
 ```bash
