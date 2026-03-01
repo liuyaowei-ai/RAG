@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from chromadb.config import Settings as ChromaSettings
 from langchain.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -53,6 +54,11 @@ class RAGEngine:
             collection_name=collection_name,
             persist_directory=str(vectorstore_dir),
             embedding_function=self.embeddings,
+            client_settings=ChromaSettings(
+                anonymized_telemetry=False,
+                is_persistent=True,
+                persist_directory=str(vectorstore_dir),
+            ),
         )
         self.llm = self._build_llm(
             llm_provider=llm_provider,
@@ -167,4 +173,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

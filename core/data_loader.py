@@ -1,16 +1,36 @@
 import argparse
-import shutil
 from pathlib import Path
 from typing import List
 
+import chromadb
+from chromadb.config import Settings as ChromaSettings
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
 
 from config.settings import get_settings
+
+
+def _load_txt_file(file_path: Path) -> List[Document]:
+    """读取 TXT 文件，按常见中文编码兜底。"""
+    encodings = ["utf-8", "gb18030", "gbk", "utf-16", "latin-1"]
+    last_error = None
+    for enc in encodings:
+        try:
+            text = file_path.read_text(encoding=enc)
+            return [
+                Document(
+                    page_content=text,
+                    metadata={"source": str(file_path.resolve()), "encoding": enc},
+                )
+            ]
+        except Exception as exc:
+            last_error = exc
+            continue
+    raise ValueError(f"无法读取文本文件: {file_path}，最后错误: {last_error}")
 
 
 def load_documents(data_dir: Path) -> List[Document]:
@@ -25,11 +45,10 @@ def load_documents(data_dir: Path) -> List[Document]:
     for file_path in tqdm(file_paths, desc="读取文档"):
         if file_path.suffix.lower() == ".pdf":
             loader = PyPDFLoader(str(file_path))
+            file_docs = loader.load()
         else:
-            # 文本文件开启编码自动检测，减少乱码风险
-            loader = TextLoader(str(file_path), autodetect_encoding=True)
+            file_docs = _load_txt_file(file_path)
 
-        file_docs = loader.load()
         for doc in file_docs:
             # 统一追加绝对路径来源，方便在前端展示引用来源
             doc.metadata["source"] = str(file_path.resolve())
@@ -85,10 +104,23 @@ def build_vectorstore(
     if not data_dir.exists():
         raise FileNotFoundError(f"数据目录不存在: {data_dir}")
 
-    if reset_db and persist_dir.exists():
-        # 重新构建时先删除旧库，避免重复写入
-        shutil.rmtree(persist_dir)
     persist_dir.mkdir(parents=True, exist_ok=True)
+
+    if reset_db:
+        # 只重置当前集合，避免 Windows 下目录锁导致删除失败
+        client = chromadb.PersistentClient(
+            path=str(persist_dir),
+            settings=ChromaSettings(
+                anonymized_telemetry=False,
+                is_persistent=True,
+                persist_directory=str(persist_dir),
+            ),
+        )
+        try:
+            client.delete_collection(collection_name)
+        except Exception:
+            # 集合不存在时忽略
+            pass
 
     documents = load_documents(data_dir)
     if not documents:
@@ -101,6 +133,11 @@ def build_vectorstore(
         collection_name=collection_name,
         persist_directory=str(persist_dir),
         embedding_function=embeddings,
+        client_settings=ChromaSettings(
+            anonymized_telemetry=False,
+            is_persistent=True,
+            persist_directory=str(persist_dir),
+        ),
     )
     vector_store.add_documents(chunks)
 
@@ -139,4 +176,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

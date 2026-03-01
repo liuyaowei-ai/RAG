@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 # 加载根目录下的 .env 配置
 load_dotenv()
+# 关闭 Chroma 匿名遥测，减少无关日志输出
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,4 +41,3 @@ def get_settings() -> Settings:
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.vectorstore_dir.mkdir(parents=True, exist_ok=True)
     return settings
-
