@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗 RAG 问答系统</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --sub: #4b5563;
+            --primary: #0f766e;
+            --border: #e5e7eb;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #f0fdfa, #eef2ff);
+            color: var(--text);
+        }
+        .container {
+            max-width: 960px;
+            margin: 48px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(15, 118, 110, 0.08);
+        }
+        h1 {
+            margin: 0 0 12px;
+            font-size: 32px;
+            color: var(--primary);
+        }
+        h2 { margin-top: 28px; font-size: 22px; }
+        p { color: var(--sub); line-height: 1.7; }
+        ul { color: var(--sub); line-height: 1.8; padding-left: 20px; }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .tag {
+            display: inline-block;
+            background: #ecfeff;
+            color: #0f766e;
+            border: 1px solid #99f6e4;
+            padding: 6px 10px;
+            border-radius: 999px;
+            margin-right: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>轻量级医疗 RAG 问答系统</h1>
+        <p>本项目用于计算机复试展示，目标是实现一个可信、可解释、可本地部署的医疗知识问答系统。</p>
+
+        <div>
+            <span class="tag">Python 3.9</span>
+            <span class="tag">LangChain</span>
+            <span class="tag">ChromaDB</span>
+            <span class="tag">text2vec-base-chinese</span>
+            <span class="tag">OpenAI / Ollama</span>
+            <span class="tag">Streamlit</span>
+        </div>
+
+        <h2>系统流程</h2>
+        <ul>
+            <li>读取 <code>PDF/TXT</code> 医疗文档，进行分块切分。</li>
+            <li>使用中文向量模型生成 Embedding，并存入本地 ChromaDB。</li>
+            <li>用户提问后执行 Top-K 检索，再将上下文交给 LLM 生成回答。</li>
+            <li>回答区展示“参考的本地文档来源”，提高可信度。</li>
+        </ul>
+
+        <h2>关键约束</h2>
+        <p>模型被提示为“只能基于检索上下文回答”。若上下文无法支持回答，系统会返回：<code>知识库中未找到相关信息</code>，减少医疗场景下的幻觉。</p>
+
+        <h2>运行方式</h2>
+        <ul>
+            <li>构建向量库：<code>python -m core.data_loader</code></li>
+            <li>启动前端：<code>streamlit run app.py</code></li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,25 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Streamlit / local config
+.streamlit/
+.env
+
+# Data and database
+data/vectorstore/
+data/uploads/
+
+# OS
+.DS_Store
+Thumbs.db
